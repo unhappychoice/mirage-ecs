@@ -200,11 +200,13 @@ type ConfigParams struct {
 }
 
 type Network struct {
-	ProxyTimeout time.Duration `yaml:"proxy_timeout"`
+	ProxyTimeout  time.Duration `yaml:"proxy_timeout"`
+	FlushInterval time.Duration `yaml:"flush_interval"`
 }
 
 const DefaultPort = 80
 const DefaultProxyTimeout = 0
+const DefaultFlushInterval = 0
 const AuthCookieName = "mirage-ecs-auth"
 const AuthCookieExpire = 24 * time.Hour
 
@@ -230,7 +232,8 @@ func NewConfig(ctx context.Context, p *ConfigParams) (*Config, error) {
 			HTTPS: nil,
 		},
 		Network: Network{
-			ProxyTimeout: DefaultProxyTimeout,
+			ProxyTimeout:  DefaultProxyTimeout,
+			FlushInterval: DefaultFlushInterval,
 		},
 		HtmlDir: "./html",
 		ECS: ECSCfg{
@@ -320,6 +323,10 @@ func NewConfig(ctx context.Context, p *ConfigParams) (*Config, error) {
 
 	if err := cfg.fillECSDefaults(ctx); err != nil {
 		slog.Warn(f("failed to fill ECS defaults: %s", err))
+	}
+
+	if cfg.Network.FlushInterval < 0 {
+		return nil, fmt.Errorf("invalid network.flush_interval: %s must not be negative", cfg.Network.FlushInterval)
 	}
 
 	if cfg.Purge != nil {

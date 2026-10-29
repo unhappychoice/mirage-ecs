@@ -234,6 +234,7 @@ func (r *ReverseProxy) AddSubdomain(subdomain string, ipaddress string, targetPo
 			tp.AuthCookieValidateFunc = r.cfg.Auth.ValidateAuthCookie
 		}
 		handler.Transport = tp
+		handler.FlushInterval = r.cfg.Network.FlushInterval
 		ph.add(v.ListenPort, addr, handler)
 		proxy = true
 		slog.Info(f("add subdomain: %s:%d -> %s", subdomain, v.ListenPort, addr))

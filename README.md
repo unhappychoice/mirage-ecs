@@ -122,6 +122,7 @@ listen:
       target: 80
 network:
   proxy_timeout: 0
+  flush_interval: 0
 htmldir: ./html
 parameters:
   - name: branch
@@ -176,9 +177,12 @@ listen:
 ```yaml
 network:
   proxy_timeout: 30s # timeout of reverse proxy
+  flush_interval: 100ms # interval to flush response body to clients
 ```
 
 `proxy_timeout` default is 0 (means no timeout). If `proxy_timeout` is not 0, mirage-ecs timeouts the request to backends after the specified duration and returns HTTP status 504 (Gateway Timeout).
+
+`flush_interval` default is 0 (means no periodic flushing). Without periodic flushing, the response body is buffered until the buffer fills up or the response ends, so streaming responses such as Server-Sent Events (`text/event-stream`) are not delivered to clients in real time. Set `flush_interval` to a positive duration (e.g. `100ms`) to flush the buffered response body to clients at the specified interval.
 
 #### `parameters` section
 
